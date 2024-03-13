@@ -124,7 +124,7 @@ def transform_training_data_rotate_translate(x):
             file.writelines(reference_lines)    
     file.close()
 
-def plot_accuracy(x_values, accuracy_values, model, x_label,que):
+def plot_accuracy(x_values, accuracy_values, model, x_label,que,word):
     """
     Plot the prediction accuracy vs. x_values with a title based on the model name and save the plot in the 'results' folder,
     with a custom label for the x-axis.
@@ -140,7 +140,10 @@ def plot_accuracy(x_values, accuracy_values, model, x_label,que):
     plt.plot(x_values, accuracy_values, marker='o', linestyle='-', color='b')
     plt.title(title)
     plt.xlabel(f'{x_label}---------->')
-    plt.ylabel('Prediction Accuracy (%)------------->')
+    if word == 0:
+        plt.ylabel('Letter-wise Prediction Accuracy (%)------------->')
+    else 
+        plt.ylabel('Word-wise Prediction Accuracy (%)------------->')
     if que == 3:
         plt.xscale('log')
     plt.grid(True, which="both", ls="--")
