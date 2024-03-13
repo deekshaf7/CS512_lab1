@@ -203,6 +203,7 @@ def svm_mc(c, x,t):
     
     # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
     accuracy = p_acc[0]
+    print(f"Accuracy: {accuracy :.2f}%")
     return accuracy
 
 def transform_training_data(input_file_path, x):
@@ -241,7 +242,7 @@ def transform_test_data(input_file_path):
 
     return output_file_path
 
-def svm_struct(c_value):
+def svm_struct_w(c_value):
     command1 = f"svm_hmm/svm_hmm_learn -c {c_value} data/train_struct.txt modelfile.dat"
     command2 = "svm_hmm/svm_hmm_classify data/test_struct.txt modelfile.dat classify.tags"
 
@@ -256,12 +257,44 @@ def svm_struct(c_value):
         return "Error during classification:", process2.stderr
 
     output = process2.stdout
-
     zero_one_error_match = re.search(r"Zero/one-error on test set: (\d+\.\d+)%", output)
 
     if zero_one_error_match:
         zero_one_error_value = zero_one_error_match.group(1)
         accuracy = 100 - float(zero_one_error_value)
+        print(f"Accuracy: {accuracy :.2f}%")
         return accuracy
     else:
         return "Zero/one-error value not found."
+
+def svm_struct(c_value):
+    command1 = f"svm_hmm/svm_hmm_learn -c {c_value} data/train_struct.txt modelfile.dat"
+    command2 = "svm_hmm/svm_hmm_classify data/test_struct.txt modelfile.dat classify.tags"
+
+    # Execute the training command
+    process1 = subprocess.run(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if process1.returncode != 0:
+        return "Error during training:", process1.stderr
+
+    # Execute the classification command and capture its output
+    process2 = subprocess.run(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if process2.returncode != 0:
+        return "Error during classification:", process2.stderr
+
+    #accuracy calculation for letter wise
+    #comparing classify.tags and test_struct.txt
+    actual_values = []
+    with open('data/test_struct.txt', 'r') as file:
+        for line in file:
+            first_column = line.split()[0]  # Assuming space-separated values
+            actual_values.append(int(first_column))
+
+    with open('classify.tags', 'r') as file:
+        tags = [int(line.strip()) for line in file]
+
+    matches = sum(1 for tag, actual in zip(tags, actual_values) if tag == actual)
+    accuracy = 100* matches / len(tags) if tags else 0  # Avoid division by zero
+ 
+    print(f"Accuracy: {accuracy :.2f}%")
+    return accuracy
+    
