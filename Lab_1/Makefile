@@ -11,4 +11,4 @@ build:
 
 # Target to clean up downloaded files
 clean:
-	rm -rf svm_hmm.tar.gz svm_hmm
+	rm -rf svm_hmm.tar.gz svm_hmm Results

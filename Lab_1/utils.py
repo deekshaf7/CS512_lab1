@@ -4,10 +4,12 @@ import re
 import pandas as pd
 import numpy as np
 import cv2
-import os 
 from liblinear.liblinearutil import *
+import subprocess
+import sys
 
 def transform_training_data(x):
+
     file_path1 = 'transformed_training_data/train_struct_' + str(x) + '.txt'
     file_path2 = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
     file_paths = [file_path1, file_path2]
@@ -123,7 +125,7 @@ def transform_training_data(x):
             file.writelines(reference_lines)    
     file.close()
 
-def plot_accuracy_vs_x(x_values, accuracy_values, model, x_label):
+def plot_accuracy(x_values, accuracy_values, model, x_label):
     """
     Plot the prediction accuracy vs. x_values with a title based on the model name and save the plot in the 'results' folder,
     with a custom label for the x-axis.
@@ -140,8 +142,10 @@ def plot_accuracy_vs_x(x_values, accuracy_values, model, x_label):
     plt.title(title)
     plt.xlabel(f'{x_label}---------->')
     plt.ylabel('Prediction Accuracy (%)------------->')
+    plt.xscale('log')
     plt.grid(True, which="both", ls="--")
     plt.xticks(x_values, labels=[str(x) for x in x_values])
+    plt.xscale('log')
 
     # Ensure the 'Results' directory exists
     results_dir = 'Results'
@@ -166,16 +170,22 @@ def svm_mc(c, x):
     - A float representing the prediction accuracy of the model on the test set.
     """
     # Prepare the training data set 
-    testing_data_path = 'transformed_training_data/svm_data/test_struct.txt'
-    processed_training_data_path = 'transformed_training_data/svm_data/train_struct_transformed' + str(x) + '.txt'
+    testing_data_path = 'data/test_struct.txt'
+    svm_mc_data_dir = 'svm_mc_data'
+    os.makedirs(svm_mc_data_dir, exist_ok=True)
+
+    if x == 0:
+        training_data_path = 'data/train_struct.txt'
+    else:
+        training_data_path = 'svm_mc_data/train_struct_transformed' + str(x) + '.txt'
     
     # Preprocess the training data
-    transform_test_data()
-    transform_training_data(x)
-
+    training_data_path_p = transform_training_data(training_data_path)
+    testing_data_path_p = transform_test_data(testing_data_path)
+   
     # Read the training and testing data
-    y_train, x_train = svm_read_problem(processed_training_data_path)
-    y_test, x_test = svm_read_problem(testing_data_path)
+    y_train, x_train = svm_read_problem(training_data_path_p)
+    y_test, x_test = svm_read_problem(testing_data_path_p)
 
     # Adjust the C value based on the number of training examples
     number_of_training_examples = len(y_train)
@@ -191,11 +201,10 @@ def svm_mc(c, x):
     accuracy = p_acc[0]
     return accuracy
 
-def transform_training_data(x):
-    file_path = 'transformed_training_data/train_struct_' + str(x) + '.txt'
-    output_file_path = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
+def transform_training_data(input_file_path, x):
+    output_file_path = 'svm_mc_data/train_struct_transformed' + str(x) + '.txt'
 
-    with open(file_path, 'r') as file:
+    with open(input_file_path, 'r') as file:
         modified_lines = []
         for line in file:
             parts = line.split()
@@ -208,11 +217,12 @@ def transform_training_data(x):
         for modified_line in modified_lines:
             output_file.write(modified_line + '\n')
 
-def transform_test_data():
-    file_path = 'data/test_struct.txt'
-    output_file_path = 'transformed_training_data/svm_data/test_struct.txt'
+    return output_file_path
+
+def transform_test_data(input_file_path):
+    output_file_path = 'svm_mc_data/svm_data/test_struct.txt'
     
-    with open(file_path, 'r') as file:
+    with open(input_file_path, 'r') as file:
         modified_lines = []
         for line in file:
             parts = line.split()
@@ -224,3 +234,30 @@ def transform_test_data():
     with open(output_file_path, 'w') as output_file:
         for modified_line in modified_lines:
             output_file.write(modified_line + '\n')
+
+    return output_file_path
+
+def svm_struct(c_value):
+    command1 = f"svm_hmm/svm_hmm_learn -c {c_value} data/train_struct.txt modelfile.dat"
+    command2 = "svm_hmm/svm_hmm_classify data/test_struct.txt modelfile.dat classify.tags"
+
+    # Execute the training command
+    process1 = subprocess.run(command1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if process1.returncode != 0:
+        return "Error during training:", process1.stderr
+
+    # Execute the classification command and capture its output
+    process2 = subprocess.run(command2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if process2.returncode != 0:
+        return "Error during classification:", process2.stderr
+
+    output = process2.stdout
+
+    zero_one_error_match = re.search(r"Zero/one-error on test set: (\d+\.\d+)%", output)
+
+    if zero_one_error_match:
+        zero_one_error_value = zero_one_error_match.group(1)
+        accuracy = 100 - float(zero_one_error_value)
+        return accuracy
+    else:
+        return "Zero/one-error value not found."
