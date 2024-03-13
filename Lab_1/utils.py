@@ -9,7 +9,6 @@ import subprocess
 import sys
 
 def transform_training_data(x):
-
     file_path1 = 'transformed_training_data/train_struct_' + str(x) + '.txt'
     file_path2 = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
     file_paths = [file_path1, file_path2]
@@ -180,7 +179,7 @@ def svm_mc(c, x):
         training_data_path = 'svm_mc_data/train_struct_transformed' + str(x) + '.txt'
     
     # Preprocess the training data
-    training_data_path_p = transform_training_data(training_data_path)
+    training_data_path_p = transform_training_data(training_data_path,x)
     testing_data_path_p = transform_test_data(testing_data_path)
    
     # Read the training and testing data
@@ -192,10 +191,10 @@ def svm_mc(c, x):
     n = c / number_of_training_examples
 
     # Train the model
-    model = svm_train(y_train, x_train, f'-c {n}')
+    model = train(y_train, x_train, f'-c {n}')
 
     # Predict and evaluate accuracy
-    p_label, p_acc, p_val = svm_predict(y_test, x_test, model)
+    p_label, p_acc, p_val = predict(y_test, x_test, model)
     
     # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
     accuracy = p_acc[0]
@@ -220,7 +219,7 @@ def transform_training_data(input_file_path, x):
     return output_file_path
 
 def transform_test_data(input_file_path):
-    output_file_path = 'svm_mc_data/svm_data/test_struct.txt'
+    output_file_path = 'svm_mc_data/test_struct.txt'
     
     with open(input_file_path, 'r') as file:
         modified_lines = []
