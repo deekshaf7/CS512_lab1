@@ -156,7 +156,7 @@ def plot_accuracy(x_values, accuracy_values, model, x_label,que,word):
     os.makedirs(results_dir, exist_ok=True)
 
     # Save the plot in the 'Results' folder
-    file_name = os.path.join(results_dir, f'{model}_Accuracy_vs_{x_label}.png')
+    file_name = os.path.join(results_dir, f'{model}_Accuracy_vs_{x_label}_{word}.png')
     plt.savefig(file_name)
     plt.show()  
 
@@ -203,7 +203,6 @@ def svm_mc(c, x,t):
     
     # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
     accuracy = p_acc[0]
-    print(f"Accuracy: {accuracy :.2f}%")
     return accuracy
 
 def svm_mc_w(c, x,t):
@@ -246,6 +245,10 @@ def svm_mc_w(c, x,t):
 
     # Predict and evaluate accuracy
     p_label, p_acc, p_val = predict(y_test, x_test, model)
+
+    print(p_label)
+    print(p_acc)
+    print(p_val)
     
     # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
     accuracy = p_acc[0]
