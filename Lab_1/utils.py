@@ -201,8 +201,20 @@ def svm_mc(c, x,t):
     # Predict and evaluate accuracy
     p_label, p_acc, p_val = predict(y_test, x_test, model)
     
+    #accuracy calculation for letter wise
+    #comparing p_label and test_struct.txt
+    actual_values = []
+    with open('data/test_struct.txt', 'r') as file:
+        for line in file:
+            first_column = line.split()[0]  # Assuming space-separated values
+            actual_values.append(int(first_column))
+
+    # Predict and evaluate accuracy
+    p_label, p_acc, p_val = predict(y_test, x_test, model)
+
     # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
     accuracy = p_acc[0]
+    print(f"Accuracy: {accuracy :.2f}%")
     return accuracy
 
 def svm_mc_w(c, x,t):
@@ -242,16 +254,23 @@ def svm_mc_w(c, x,t):
 
     # Train the model
     model = train(y_train, x_train, f'-c {n}')
+    
+    print("model.label")
+    print(model.label)
 
     # Predict and evaluate accuracy
     p_label, p_acc, p_val = predict(y_test, x_test, model)
-
-    print(p_label)
-    print(p_acc)
+    #p_label: a list of predicted labels
+    #p_acc: a tuple including accuracy (for classification), mean squared error, and squared correlation coefficient (for regression).    accuracy = p_acc[0]
+    #p_val: a list of decision values or probability estimates (if '-b 1'is specified). If k is the number of classes, for decision values,
+    #each element includes results of predicting k binary-class SVMs. If k = 2 and solver is not MCSVM_CS, only one decision value
+    #is returned. For probabilities, each element contains k values indicating the probability that the testing instance is in each class.
+    #Note that the order of classes here is the same as 'model.label' field in the model structure.
     print(p_val)
-    
-    # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
-    accuracy = p_acc[0]
+    # Assuming p_label contains predicted labels and y_test contains true labels
+    correct_predictions = sum(int(predicted == true) for predicted, true in zip(p_label, y_test))
+    total_predictions = len(p_label)
+    accuracy = correct_predictions / total_predictions if total_predictions > 0 else 0
     print(f"Accuracy: {accuracy :.2f}%")
     return accuracy
 

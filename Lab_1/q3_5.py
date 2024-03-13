@@ -76,7 +76,7 @@ w_accuracy_values_array_struct = list(w_accuracy_values_svm_struct.values())
 #Plot the accuracy vs c values for SVM-Struct
 model = "SVM-Struct"  # Name of the model
 x_label = "C"  # Description of what parameter is varied
-plot_accuracy(c_values, accuracy_values_array_struct, model, x_label,3,1)
+plot_accuracy(c_values, w_accuracy_values_array_struct, model, x_label,3,1)
 #---------------------------------------------------------------------------
 
 # %%
@@ -131,7 +131,20 @@ plot_accuracy(x_values, accuracy_values_array_mc_x, "SVM-MC", "x",5,0)
 
 
 # %%
-#Q5 (b) Accuracy on letter-wise prediction -the percentage of correctly predicted letters on the whole test set
+#Q5 (b) Accuracy on word-wise prediction -the percentage of correctly predicted letters on the whole test set
+#2 SVM-MC part
+# Best value of c for CRF found in 3b is 1000
+c = 1000
+w_accuracy_values_svm_mc_x = {}
+#Preprocess the data to work with the SVM-MC model and Calculate accuracy values for each x value
+for x in x_values:
+    w_accuracy_values_svm_mc_x[x] = svm_mc_w(c, x,1)
+    
+print(w_accuracy_values_svm_mc_x)
+w_accuracy_values_array_mc_x = list(w_accuracy_values_svm_mc_x.values())
 
+plot_accuracy(x_values, w_accuracy_values_array_mc_x, "SVM-MC", "x",5,1)
+
+#Observations
 
 
