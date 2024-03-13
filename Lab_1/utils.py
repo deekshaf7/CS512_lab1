@@ -142,7 +142,7 @@ def plot_accuracy(x_values, accuracy_values, model, x_label,que,word):
     plt.xlabel(f'{x_label}---------->')
     if word == 0:
         plt.ylabel('Letter-wise Prediction Accuracy (%)------------->')
-    else 
+    else:   
         plt.ylabel('Word-wise Prediction Accuracy (%)------------->')
     if que == 3:
         plt.xscale('log')
