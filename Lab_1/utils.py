@@ -206,6 +206,52 @@ def svm_mc(c, x,t):
     print(f"Accuracy: {accuracy :.2f}%")
     return accuracy
 
+def svm_mc_w(c, x,t):
+    """
+    Trains an SVM model with a given C parameter adjusted by the number of training examples,
+    and evaluates its accuracy on a test set.
+
+    Parameters:
+    - c: The base C value for SVM training.
+    - training_data_path: Path to the file containing the training data in LIBSVM format.
+    - testing_data_path: Path to the file containing the testing data in LIBSVM format.
+
+    Returns:
+    - A float representing the prediction accuracy of the model on the test set.
+    """
+    # Prepare the training data set 
+    testing_data_path = 'data/test_struct.txt'
+    svm_mc_data_dir = 'svm_mc_data'
+    os.makedirs(svm_mc_data_dir, exist_ok=True)
+
+    if t == 0:
+        training_data_path = 'data/train_struct.txt'
+    else:
+        training_data_path = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
+    
+    # Preprocess the training data
+    training_data_path_p = transform_training_data(training_data_path,x)
+    testing_data_path_p = transform_test_data(testing_data_path)
+   
+    # Read the training and testing data
+    y_train, x_train = svm_read_problem(training_data_path_p)
+    y_test, x_test = svm_read_problem(testing_data_path_p)
+
+    # Adjust the C value based on the number of training examples
+    number_of_training_examples = len(y_train)
+    n = c / number_of_training_examples
+
+    # Train the model
+    model = train(y_train, x_train, f'-c {n}')
+
+    # Predict and evaluate accuracy
+    p_label, p_acc, p_val = predict(y_test, x_test, model)
+    
+    # p_acc is a tuple containing accuracy, MSE, and SCC. We return only the accuracy.
+    accuracy = p_acc[0]
+    print(f"Accuracy: {accuracy :.2f}%")
+    return accuracy
+
 def transform_training_data(input_file_path, x):
     output_file_path = 'svm_mc_data/train_struct_transformed' + str(x) + '.txt'
 
