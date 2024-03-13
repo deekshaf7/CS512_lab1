@@ -11,4 +11,4 @@ build:
 
 # Target to clean up downloaded files
 clean:
-	rm -rf svm_hmm.tar.gz svm_hmm Results __pycache__ .DS_Store modelfile.dat svm_mc_data
+	rm -rf svm_hmm.tar.gz svm_hmm Results __pycache__ .DS_Store modelfile.dat svm_mc_data transformed_training_data classify.tags

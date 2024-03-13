@@ -8,7 +8,7 @@ from liblinear.liblinearutil import *
 import subprocess
 import sys
 
-def transform_training_data(x):
+def transform_training_data_rotate_translate(x):
     file_path1 = 'transformed_training_data/train_struct_' + str(x) + '.txt'
     file_path2 = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
     file_paths = [file_path1, file_path2]
@@ -124,7 +124,7 @@ def transform_training_data(x):
             file.writelines(reference_lines)    
     file.close()
 
-def plot_accuracy(x_values, accuracy_values, model, x_label):
+def plot_accuracy(x_values, accuracy_values, model, x_label,que):
     """
     Plot the prediction accuracy vs. x_values with a title based on the model name and save the plot in the 'results' folder,
     with a custom label for the x-axis.
@@ -141,10 +141,12 @@ def plot_accuracy(x_values, accuracy_values, model, x_label):
     plt.title(title)
     plt.xlabel(f'{x_label}---------->')
     plt.ylabel('Prediction Accuracy (%)------------->')
-    plt.xscale('log')
+    if que == 3:
+        plt.xscale('log')
     plt.grid(True, which="both", ls="--")
     plt.xticks(x_values, labels=[str(x) for x in x_values])
-    plt.xscale('log')
+    if que == 3:
+        plt.xscale('log')
 
     # Ensure the 'Results' directory exists
     results_dir = 'Results'
@@ -155,7 +157,7 @@ def plot_accuracy(x_values, accuracy_values, model, x_label):
     plt.savefig(file_name)
     plt.show()  
 
-def svm_mc(c, x):
+def svm_mc(c, x,t):
     """
     Trains an SVM model with a given C parameter adjusted by the number of training examples,
     and evaluates its accuracy on a test set.
@@ -173,10 +175,10 @@ def svm_mc(c, x):
     svm_mc_data_dir = 'svm_mc_data'
     os.makedirs(svm_mc_data_dir, exist_ok=True)
 
-    if x == 0:
+    if t == 0:
         training_data_path = 'data/train_struct.txt'
     else:
-        training_data_path = 'svm_mc_data/train_struct_transformed' + str(x) + '.txt'
+        training_data_path = 'transformed_training_data/train_struct_transformed' + str(x) + '.txt'
     
     # Preprocess the training data
     training_data_path_p = transform_training_data(training_data_path,x)
