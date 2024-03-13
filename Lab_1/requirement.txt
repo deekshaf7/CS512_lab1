@@ -1,0 +1,6 @@
+#apt-get install wget 
+
+#Run Makefile 
+make svm_hmm_package_download 
+make svm_hmm_package
+
