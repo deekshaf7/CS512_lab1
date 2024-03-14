@@ -255,23 +255,36 @@ def svm_mc_w(c, x,t):
     # Train the model
     model = train(y_train, x_train, f'-c {n}')
     
-    print("model.label")
-    print(model.label)
-
     # Predict and evaluate accuracy
     p_label, p_acc, p_val = predict(y_test, x_test, model)
     #p_label: a list of predicted labels
-    #p_acc: a tuple including accuracy (for classification), mean squared error, and squared correlation coefficient (for regression).    accuracy = p_acc[0]
-    #p_val: a list of decision values or probability estimates (if '-b 1'is specified). If k is the number of classes, for decision values,
-    #each element includes results of predicting k binary-class SVMs. If k = 2 and solver is not MCSVM_CS, only one decision value
-    #is returned. For probabilities, each element contains k values indicating the probability that the testing instance is in each class.
-    #Note that the order of classes here is the same as 'model.label' field in the model structure.
-    print(p_val)
-    # Assuming p_label contains predicted labels and y_test contains true labels
-    correct_predictions = sum(int(predicted == true) for predicted, true in zip(p_label, y_test))
-    total_predictions = len(p_label)
-    accuracy = correct_predictions / total_predictions if total_predictions > 0 else 0
+    #p_acc: a tuple including accuracy (for classification), mean squared error, and squared correlation coefficient (for regression).  accuracy = p_acc[0]  
+    # Load the predicted labels from a p_label list
+    # Load the actual labels from the y_test list
+    # Compare the predicted and actual labels to calculate the accuracy
+    #accuracy calculation for word wise
+    #comparing p_label and y_test for a given qid value in test_struct.txt
+    df = pd.read_csv('/Users/deekshanandal/Documents/GitHub/CS51submission_1/Lab_1/data/test.txt', header=None, sep=' ')
+    word_id = df[3]
+
+    mapping = {}
+    mapping_label = {}
+
+    for i in range(len(word_id)):
+        if word_id[i] not in mapping.keys():
+            mapping[word_id[i]] = [p_label[i]]
+            mapping_label[word_id[i]] = [y_test[i]]
+        else:
+            mapping[word_id[i]].append(p_label[i])
+            mapping_label[word_id[i]].append(y_test[i])
+
+    matches = 0
+    for i in mapping.keys():
+        if mapping[i] == mapping_label[i]:
+            matches += 1
+    accuracy = 100* matches / len(mapping) if mapping else 0  # Avoid division by zero
     print(f"Accuracy: {accuracy :.2f}%")
+
     return accuracy
 
 def transform_training_data(input_file_path, x):
